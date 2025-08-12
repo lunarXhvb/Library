@@ -1,1 +1,14 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/lunarXhvb/Library/refs/heads/main/Library.luau"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lunarXhvb/Library/refs/heads/main/Library.luau"))()
+
+
+-- Start loading animation (optional)
+if Library:LoadAnimation() then
+    Library:StartLoad()
+end
+
+-- Create Window
+local Window = Library:Window({
+    SubTitle = "v2.0",
+    Size = UDim2.new(0, 600, 0, 400),
+    TabWidth = 150
+})
