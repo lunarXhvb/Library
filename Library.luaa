@@ -872,84 +872,89 @@ function Update:Window(Config)
 				ResizeButton.Image = "rbxassetid://10734886735";
 			end;
 		end);
-		local main = {};
-		function main:Button(text, callback)
-			local Button = Instance.new("Frame");
-			local UICorner = Instance.new("UICorner");
-			local TextLabel = Instance.new("TextLabel");
-			local TextButton = Instance.new("TextButton");
-			local UICorner_2 = Instance.new("UICorner");
-			local Black = Instance.new("Frame");
-			local UICorner_3 = Instance.new("UICorner");
-			Button.Name = "Button";
-			Button.Parent = MainFramePage;
-			Button.BackgroundColor3 = _G.Primary;
-			Button.BackgroundTransparency = 1;
-			Button.Size = UDim2.new(1, 0, 0, 36);
-			UICorner.CornerRadius = UDim.new(0, 5);
-			UICorner.Parent = Button;
-			local ImageLabel = Instance.new("ImageLabel");
-			ImageLabel.Name = "ImageLabel";
-			ImageLabel.Parent = TextButton;
-			ImageLabel.BackgroundColor3 = _G.Primary;
-			ImageLabel.BackgroundTransparency = 1;
-			ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5);
-			ImageLabel.Position = UDim2.new(0.5, 0, 0.5, 0);
-			ImageLabel.Size = UDim2.new(0, 15, 0, 15);
-			ImageLabel.Image = "rbxassetid://10734898355";
-			ImageLabel.ImageTransparency = 0;
-			ImageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255);
-			CreateRounded(TextButton, 4);
-			TextButton.Name = "TextButton";
-			TextButton.Parent = Button;
-			TextButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200);
-			TextButton.BackgroundTransparency = 0.8;
-			TextButton.AnchorPoint = Vector2.new(1, 0.5);
-			TextButton.Position = UDim2.new(1, -1, 0.5, 0);
-			TextButton.Size = UDim2.new(0, 25, 0, 25);
-			TextButton.Font = Enum.Font.Nunito;
-			TextButton.Text = "";
-			TextButton.TextXAlignment = Enum.TextXAlignment.Left;
-			TextButton.TextColor3 = Color3.fromRGB(255, 255, 255);
-			TextButton.TextSize = 15;
-			TextLabel.Name = "TextLabel";
-			TextLabel.Parent = Button;
-			TextLabel.BackgroundColor3 = _G.Primary;
-			TextLabel.BackgroundTransparency = 1;
-			TextLabel.AnchorPoint = Vector2.new(0, 0.5);
-			TextLabel.Position = UDim2.new(0, 20, 0.5, 0);
-			TextLabel.Size = UDim2.new(1, -50, 1, 0);
-			TextLabel.Font = Enum.Font.Cartoon;
-			TextLabel.RichText = true;
-			TextLabel.Text = text;
-			TextLabel.TextXAlignment = Enum.TextXAlignment.Left;
-			TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255);
-			TextLabel.TextSize = 15;
-			TextLabel.ClipsDescendants = true;
-            local ArrowRight = Instance.new("ImageLabel");
-			ArrowRight.Name = "ArrowRight";
-			ArrowRight.Parent = Button;
-			ArrowRight.BackgroundColor3 = _G.Primary;
-			ArrowRight.BackgroundTransparency = 1;
-			ArrowRight.AnchorPoint = Vector2.new(0, 0.5);
-			ArrowRight.Position = UDim2.new(0, 0, 0.5, 0);
-			ArrowRight.Size = UDim2.new(0, 15, 0, 15);
-			ArrowRight.Image = "rbxassetid://10709768347";
-			ArrowRight.ImageTransparency = 0;
-			ArrowRight.ImageColor3 = Color3.fromRGB(255, 255, 255);
-			Black.Name = "Black";
-			Black.Parent = Button;
-			Black.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
-			Black.BackgroundTransparency = 1;
-			Black.BorderSizePixel = 0;
-			Black.Position = UDim2.new(0, 0, 0, 0);
-			Black.Size = UDim2.new(1, 0, 0, 33);
-			UICorner_3.CornerRadius = UDim.new(0, 5);
-			UICorner_3.Parent = Black;
-			TextButton.MouseButton1Click:Connect(function()
-				callback();
-			end);
-		end;
+local main = {};
+function main:Button(text, callback)
+	local Button = Instance.new("Frame");
+	local UICorner = Instance.new("UICorner");
+	local TextLabel = Instance.new("TextLabel");
+	local TextButton = Instance.new("TextButton");
+	local UICorner_2 = Instance.new("UICorner");
+	local Black = Instance.new("Frame");
+	local UICorner_3 = Instance.new("UICorner");
+	Button.Name = "Button";
+	Button.Parent = MainFramePage;
+	Button.BackgroundColor3 = _G.Primary;
+	Button.BackgroundTransparency = 1;
+	Button.Size = UDim2.new(1, 0, 0, 36);
+	UICorner.CornerRadius = UDim.new(0, 5);
+	UICorner.Parent = Button;
+	
+	-- Make the whole button clickable
+	local ClickableButton = Instance.new("TextButton");
+	ClickableButton.Name = "ClickableButton";
+	ClickableButton.Parent = Button;
+	ClickableButton.BackgroundTransparency = 1;
+	ClickableButton.Position = UDim2.new(0, 0, 0, 0);
+	ClickableButton.Size = UDim2.new(1, 0, 1, 0);
+	ClickableButton.Text = "";
+	ClickableButton.AutoButtonColor = false;
+	
+	local ImageLabel = Instance.new("ImageLabel");
+	ImageLabel.Name = "ImageLabel";
+	ImageLabel.Parent = Button; -- Changed parent to Button instead of TextButton
+	ImageLabel.BackgroundColor3 = _G.Primary;
+	ImageLabel.BackgroundTransparency = 1;
+	ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5);
+	ImageLabel.Position = UDim2.new(1, -12.5, 0.5, 0); -- Moved to right side
+	ImageLabel.Size = UDim2.new(0, 15, 0, 15);
+	ImageLabel.Image = "rbxassetid://10734898355";
+	ImageLabel.ImageTransparency = 0;
+	ImageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255);
+	
+	-- Remove the old TextButton since we're using ClickableButton now
+	
+	TextLabel.Name = "TextLabel";
+	TextLabel.Parent = Button;
+	TextLabel.BackgroundColor3 = _G.Primary;
+	TextLabel.BackgroundTransparency = 1;
+	TextLabel.AnchorPoint = Vector2.new(0, 0.5);
+	TextLabel.Position = UDim2.new(0, 20, 0.5, 0);
+	TextLabel.Size = UDim2.new(1, -50, 1, 0);
+	TextLabel.Font = Enum.Font.Cartoon;
+	TextLabel.RichText = true;
+	TextLabel.Text = text;
+	TextLabel.TextXAlignment = Enum.TextXAlignment.Left;
+	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255);
+	TextLabel.TextSize = 15;
+	TextLabel.ClipsDescendants = true;
+	
+	local ArrowRight = Instance.new("ImageLabel");
+	ArrowRight.Name = "ArrowRight";
+	ArrowRight.Parent = Button;
+	ArrowRight.BackgroundColor3 = _G.Primary;
+	ArrowRight.BackgroundTransparency = 1;
+	ArrowRight.AnchorPoint = Vector2.new(0, 0.5);
+	ArrowRight.Position = UDim2.new(0, 0, 0.5, 0);
+	ArrowRight.Size = UDim2.new(0, 15, 0, 15);
+	ArrowRight.Image = "rbxassetid://10709768347";
+	ArrowRight.ImageTransparency = 0;
+	ArrowRight.ImageColor3 = Color3.fromRGB(255, 255, 255);
+	
+	Black.Name = "Black";
+	Black.Parent = Button;
+	Black.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
+	Black.BackgroundTransparency = 1;
+	Black.BorderSizePixel = 0;
+	Black.Position = UDim2.new(0, 0, 0, 0);
+	Black.Size = UDim2.new(1, 0, 0, 33);
+	UICorner_3.CornerRadius = UDim.new(0, 5);
+	UICorner_3.Parent = Black;
+	
+	-- Connect the click event to the whole button
+	ClickableButton.MouseButton1Click:Connect(function()
+		callback();
+	end);
+end;
 		function main:Toggle(text, config, desc, callback)
 			config = config or false;
 			local toggled = config;
