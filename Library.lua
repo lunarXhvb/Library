@@ -319,22 +319,30 @@ function Update:LoadAnimation()
 	end;
 	return false;
 end;
+
+
 function Update:Window(Config)
 	assert(Config.SubTitle, "v4");
+	
 	local WindowConfig = {
 		Size = Config.Size,
 		TabWidth = Config.TabWidth
 	};
+	
 	local osfunc = {};
 	local uihide = false;
 	local abc = false;
 	local currentpage = "";
 	local keybind = keybind or Enum.KeyCode.RightControl;
 	local yoo = string.gsub(tostring(keybind), "Enum.KeyCode.", "");
+	
+	-- Create main ScreenGui
 	local LUNAR = Instance.new("ScreenGui");
 	LUNAR.Name = "LUNAR";
 	LUNAR.Parent = game.CoreGui;
 	LUNAR.DisplayOrder = 999;
+	
+	-- Create outline frame
 	local OutlineMain = Instance.new("Frame");
 	OutlineMain.Name = "OutlineMain";
 	OutlineMain.Parent = LUNAR;
@@ -345,6 +353,8 @@ function Update:Window(Config)
 	OutlineMain.Position = UDim2.new(0.5, 0, 0.45, 0);
 	OutlineMain.Size = UDim2.new(0, 0, 0, 0);
 	CreateRounded(OutlineMain, 15);
+	
+	-- Create main frame
 	local Main = Instance.new("Frame");
 	Main.Name = "Main";
 	Main.Parent = OutlineMain;
@@ -354,10 +364,23 @@ function Update:Window(Config)
 	Main.BackgroundTransparency = 0;
 	Main.Position = UDim2.new(0.5, 0, 0.5, 0);
 	Main.Size = WindowConfig.Size;
-	OutlineMain:TweenSize(UDim2.new(0, WindowConfig.Size.X.Offset + 15, 0, WindowConfig.Size.Y.Offset + 15), "Out", "Quad", 0.4, true);
+	
+	-- Animate outline appearance
+	OutlineMain:TweenSize(
+		UDim2.new(0, WindowConfig.Size.X.Offset + 15, 0, WindowConfig.Size.Y.Offset + 15), 
+		"Out", 
+		"Quad", 
+		0.4, 
+		true
+	);
 	CreateRounded(Main, 12);
 	
-	-- Resize Dot (Bottom Right Corner)
+	-- Services
+	local UserInputService = game:GetService("UserInputService");
+	local TweenService = game:GetService("TweenService");
+	local TextService = game:GetService("TextService");
+	
+	-- Resize functionality
 	local ResizeDot = Instance.new("Frame");
 	ResizeDot.Name = "ResizeDot";
 	ResizeDot.Parent = Main;
@@ -369,34 +392,31 @@ function Update:Window(Config)
 	ResizeDot.ZIndex = 10;
 	CreateRounded(ResizeDot, 6);
 	
-	-- Make resize dot draggable for both PC and Mobile
-	local UserInputService = game:GetService("UserInputService");
-	local TweenService = game:GetService("TweenService");
+	-- Resize variables
 	local Dragging = false;
-	local MinSize = Vector2.new(400, 300); -- Minimum window size
+	local MinSize = Vector2.new(400, 300);
 	
+	-- Resize input handling
 	ResizeDot.InputBegan:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 			Dragging = true;
-			-- Visual feedback
 			TweenService:Create(ResizeDot, TweenInfo.new(0.1), {
 				BackgroundTransparency = 0,
 				Size = UDim2.new(0, 15, 0, 15)
 			}):Play();
-		end;
+		end
 	end);
 	
 	UserInputService.InputEnded:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 			if Dragging then
 				Dragging = false;
-				-- Reset visual feedback
 				TweenService:Create(ResizeDot, TweenInfo.new(0.1), {
 					BackgroundTransparency = 0.3,
 					Size = UDim2.new(0, 12, 0, 12)
 				}):Play();
-			end;
-		end;
+			end
+		end
 	end);
 	
 	UserInputService.InputChanged:Connect(function(Input)
@@ -404,37 +424,33 @@ function Update:Window(Config)
 			local NewSizeX = math.max(MinSize.X, Input.Position.X - Main.AbsolutePosition.X);
 			local NewSizeY = math.max(MinSize.Y, Input.Position.Y - Main.AbsolutePosition.Y);
 			
-			-- Update Main frame size
 			Main.Size = UDim2.new(0, NewSizeX, 0, NewSizeY);
-			-- Update OutlineMain size
 			OutlineMain.Size = UDim2.new(0, NewSizeX + 15, 0, NewSizeY + 15);
 			
-			-- Update other UI elements that depend on window size
+			-- Update dependent UI elements
 			if Tab then
 				Tab.Size = UDim2.new(0, WindowConfig.TabWidth, 0, NewSizeY - Top.Size.Y.Offset - 8);
-			end;
+			end
 			if Page then
 				Page.Size = UDim2.new(0, NewSizeX - Tab.Size.X.Offset - 25, 0, NewSizeY - Top.Size.Y.Offset - 8);
-			end;
-		end;
+			end
+		end
 	end);
 	
-	-- Make resize dot more visible on mobile
+	-- Platform-specific resize dot adjustment
 	local function UpdateResizeDotForPlatform()
 		if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-			-- Mobile device
 			ResizeDot.Size = UDim2.new(0, 20, 0, 20);
 			ResizeDot.BackgroundTransparency = 0.1;
 		else
-			-- PC
 			ResizeDot.Size = UDim2.new(0, 12, 0, 12);
 			ResizeDot.BackgroundTransparency = 0.3;
-		end;
-	end;
+		end
+	end
 	
 	UpdateResizeDotForPlatform();
 	
-	-- Hover effect for PC
+	-- PC hover effects
 	if not UserInputService.TouchEnabled then
 		ResizeDot.MouseEnter:Connect(function()
 			TweenService:Create(ResizeDot, TweenInfo.new(0.2), {
@@ -449,279 +465,351 @@ function Update:Window(Config)
 					BackgroundTransparency = 0.3,
 					Size = UDim2.new(0, 12, 0, 12)
 				}):Play();
-			end;
+			end
 		end);
-	end;
-
-	local BtnStroke = Instance.new("UIStroke");
+	end
+	
+	-- Legacy drag button (keeping for compatibility)
 	local DragButton = Instance.new("Frame");
 	DragButton.Name = "DragButton";
 	DragButton.Parent = Main;
 	DragButton.Position = UDim2.new(1, 5, 1, 5);
 	DragButton.AnchorPoint = Vector2.new(1, 1);
 	DragButton.Size = UDim2.new(0, 15, 0, 15);
-	DragButton.BackgroundColor3 = _G.Primary;
+	DragButton.BackgroundColor3 = _G.Primary or Color3.fromRGB(255, 0, 0);
 	DragButton.BackgroundTransparency = 1;
+	DragButton.ZIndex = 10;
+	
+	local CircleDragButton = Instance.new("UICorner");
+	CircleDragButton.Name = "CircleDragButton";
+	CircleDragButton.Parent = DragButton;
+	CircleDragButton.CornerRadius = UDim.new(0, 99);
+	
+	-- Top bar
+	local Top = Instance.new("Frame");
+	Top.Name = "Top";
+	Top.Parent = Main;
+	Top.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
+	Top.Size = UDim2.new(1, 0, 0, 40);
+	Top.BackgroundTransparency = 1;
+	CreateRounded(Top, 5);
+	
+	-- Title
+	local NameHub = Instance.new("TextLabel");
+	NameHub.Name = "NameHub";
+	NameHub.Parent = Top;
+	NameHub.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+	NameHub.BackgroundTransparency = 1;
+	NameHub.RichText = true;
+	NameHub.Position = UDim2.new(0, 15, 0.5, 0);
+	NameHub.AnchorPoint = Vector2.new(0, 0.5);
+	NameHub.Size = UDim2.new(0, 1, 0, 25);
+	NameHub.Font = Enum.Font.GothamBold;
+	NameHub.Text = "LUNAR";
+	NameHub.TextSize = 20;
+	NameHub.TextColor3 = Color3.fromRGB(255, 255, 255);
+	NameHub.TextXAlignment = Enum.TextXAlignment.Left;
+	
+	local nameHubSize = TextService:GetTextSize(
+		NameHub.Text, 
+		NameHub.TextSize, 
+		NameHub.Font, 
+		Vector2.new(math.huge, math.huge)
+	);
+	NameHub.Size = UDim2.new(0, nameHubSize.X, 0, 25);
+	
+	-- Subtitle
+	local SubTitle = Instance.new("TextLabel");
+	SubTitle.Name = "SubTitle";
+	SubTitle.Parent = NameHub;
+	SubTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+	SubTitle.BackgroundTransparency = 1;
+	SubTitle.Position = UDim2.new(0, nameHubSize.X + 8, 0.5, 0);
+	SubTitle.Size = UDim2.new(0, 1, 0, 20);
+	SubTitle.Font = Enum.Font.Cartoon;
+	SubTitle.AnchorPoint = Vector2.new(0, 0.5);
+	SubTitle.Text = Config.SubTitle;
+	SubTitle.TextSize = 15;
+	SubTitle.TextColor3 = Color3.fromRGB(150, 150, 150);
+	
+	local SubTitleSize = TextService:GetTextSize(
+		SubTitle.Text, 
+		SubTitle.TextSize, 
+		SubTitle.Font, 
+		Vector2.new(math.huge, math.huge)
+	);
+	SubTitle.Size = UDim2.new(0, SubTitleSize.X, 0, 25);
+	
+	-- Close button
+	local CloseButton = Instance.new("ImageButton");
+	CloseButton.Name = "CloseButton";
+	CloseButton.Parent = Top;
+	CloseButton.BackgroundColor3 = _G.Primary or Color3.fromRGB(255, 0, 0);
+	CloseButton.BackgroundTransparency = 1;
+	CloseButton.AnchorPoint = Vector2.new(1, 0.5);
+	CloseButton.Position = UDim2.new(1, -15, 0.5, 0);
+	CloseButton.Size = UDim2.new(0, 20, 0, 20);
+	CloseButton.Image = "rbxassetid://7743878857";
+	CloseButton.ImageTransparency = 0;
+	CloseButton.ImageColor3 = Color3.fromRGB(245, 245, 245);
+	CreateRounded(CloseButton, 3);
+	
+	CloseButton.MouseButton1Click:Connect(function()
+		local lunarGui = game.CoreGui:FindFirstChild("LUNAR");
+		if lunarGui then
+			lunarGui.Enabled = not lunarGui.Enabled;
+		end
+	end);
+	
+	-- Resize button
+	local ResizeButton = Instance.new("ImageButton");
+	ResizeButton.Name = "ResizeButton";
+	ResizeButton.Parent = Top;
+	ResizeButton.BackgroundColor3 = _G.Primary or Color3.fromRGB(255, 0, 0);
+	ResizeButton.BackgroundTransparency = 1;
+	ResizeButton.AnchorPoint = Vector2.new(1, 0.5);
+	ResizeButton.Position = UDim2.new(1, -50, 0.5, 0);
+	ResizeButton.Size = UDim2.new(0, 20, 0, 20);
+	ResizeButton.Image = "rbxassetid://10734886735";
+	ResizeButton.ImageTransparency = 0;
+	ResizeButton.ImageColor3 = Color3.fromRGB(245, 245, 245);
+	CreateRounded(ResizeButton, 3);
+	
+	-- Settings background
+	local BackgroundSettings = Instance.new("Frame");
+	BackgroundSettings.Name = "BackgroundSettings";
+	BackgroundSettings.Parent = OutlineMain;
+	BackgroundSettings.ClipsDescendants = true;
+	BackgroundSettings.Active = true;
+	BackgroundSettings.AnchorPoint = Vector2.new(0, 0);
+	BackgroundSettings.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
+	BackgroundSettings.BackgroundTransparency = 0.3;
+	BackgroundSettings.Position = UDim2.new(0, 0, 0, 0);
+	BackgroundSettings.Size = UDim2.new(1, 0, 1, 0);
+	BackgroundSettings.Visible = false;
+	CreateRounded(BackgroundSettings, 15);
+	
+	-- Settings frame
+	local SettingsFrame = Instance.new("Frame");
+	SettingsFrame.Name = "SettingsFrame";
+	SettingsFrame.Parent = BackgroundSettings;
+	SettingsFrame.ClipsDescendants = true;
+	SettingsFrame.AnchorPoint = Vector2.new(0.5, 0.5);
+	SettingsFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
+	SettingsFrame.BackgroundTransparency = 0;
+	SettingsFrame.Position = UDim2.new(0.5, 0, 0.5, 0);
+	SettingsFrame.Size = UDim2.new(0.7, 0, 0.7, 0);
+	CreateRounded(SettingsFrame, 15);
+	
+	-- Close settings button
+	local CloseSettings = Instance.new("ImageButton");
+	CloseSettings.Name = "CloseSettings";
+	CloseSettings.Parent = SettingsFrame;
+	CloseSettings.BackgroundColor3 = _G.Primary or Color3.fromRGB(255, 0, 0);
+	CloseSettings.BackgroundTransparency = 1;
+	CloseSettings.AnchorPoint = Vector2.new(1, 0);
+	CloseSettings.Position = UDim2.new(1, -20, 0, 15);
+	CloseSettings.Size = UDim2.new(0, 20, 0, 20);
+	CloseSettings.Image = "rbxassetid://10747384394";
+	CloseSettings.ImageTransparency = 0;
+	CloseSettings.ImageColor3 = Color3.fromRGB(245, 245, 245);
+	CreateRounded(CloseSettings, 3);
+	
+	CloseSettings.MouseButton1Click:Connect(function()
+		BackgroundSettings.Visible = false;
+	end);
+	
+	-- Settings button
+	local SettingsButton = Instance.new("ImageButton");
+	SettingsButton.Name = "SettingsButton";
+	SettingsButton.Parent = Top;
+	SettingsButton.BackgroundColor3 = _G.Primary or Color3.fromRGB(255, 0, 0);
+	SettingsButton.BackgroundTransparency = 1;
+	SettingsButton.AnchorPoint = Vector2.new(1, 0.5);
+	SettingsButton.Position = UDim2.new(1, -85, 0.5, 0);
+	SettingsButton.Size = UDim2.new(0, 20, 0, 20);
+	SettingsButton.Image = "rbxassetid://10734950020";
+	SettingsButton.ImageTransparency = 0;
+	SettingsButton.ImageColor3 = Color3.fromRGB(245, 245, 245);
+	CreateRounded(SettingsButton, 3);
+	
+	SettingsButton.MouseButton1Click:Connect(function()
+		BackgroundSettings.Visible = true;
+	end);
+	
+	-- Settings title
+	local TitleSettings = Instance.new("TextLabel");
+	TitleSettings.Name = "TitleSettings";
+	TitleSettings.Parent = SettingsFrame;
+	TitleSettings.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+	TitleSettings.BackgroundTransparency = 1;
+	TitleSettings.Position = UDim2.new(0, 20, 0, 15);
+	TitleSettings.Size = UDim2.new(1, 0, 0, 20);
+	TitleSettings.Font = Enum.Font.GothamBold;
+	TitleSettings.AnchorPoint = Vector2.new(0, 0);
+	TitleSettings.Text = "Library Settings";
+	TitleSettings.TextSize = 20;
+	TitleSettings.TextColor3 = Color3.fromRGB(245, 245, 245);
+	TitleSettings.TextXAlignment = Enum.TextXAlignment.Left;
+	
+	-- Settings menu container
+	local SettingsMenuList = Instance.new("Frame");
+	SettingsMenuList.Name = "SettingsMenuList";
+	SettingsMenuList.Parent = SettingsFrame;
+	SettingsMenuList.ClipsDescendants = true;
+	SettingsMenuList.AnchorPoint = Vector2.new(0, 0);
+	SettingsMenuList.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
+	SettingsMenuList.BackgroundTransparency = 1;
+	SettingsMenuList.Position = UDim2.new(0, 0, 0, 50);
+	SettingsMenuList.Size = UDim2.new(1, 0, 1, -70);
+	CreateRounded(SettingsMenuList, 15);
+	
+	-- Settings scroll frame
+	local ScrollSettings = Instance.new("ScrollingFrame");
+	ScrollSettings.Name = "ScrollSettings";
+	ScrollSettings.Parent = SettingsMenuList;
+	ScrollSettings.Active = true;
+	ScrollSettings.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
+	ScrollSettings.Position = UDim2.new(0, 0, 0, 0);
+	ScrollSettings.BackgroundTransparency = 1;
+	ScrollSettings.Size = UDim2.new(1, 0, 1, 0);
+	ScrollSettings.ScrollBarThickness = 3;
+	ScrollSettings.ScrollingDirection = Enum.ScrollingDirection.Y;
+	CreateRounded(SettingsMenuList, 5);
+	
+	-- Settings layout
+	local SettingsListLayout = Instance.new("UIListLayout");
+	SettingsListLayout.Name = "SettingsListLayout";
+	SettingsListLayout.Parent = ScrollSettings;
+	SettingsListLayout.SortOrder = Enum.SortOrder.LayoutOrder;
+	SettingsListLayout.Padding = UDim.new(0, 8);
+	
+	local PaddingScroll = Instance.new("UIPadding");
+	PaddingScroll.Name = "PaddingScroll";
+	PaddingScroll.Parent = ScrollSettings;
+	
+	-- Checkbox creation function
+	function CreateCheckbox(title, state, callback)
+		local checked = state or false;
+		
+		local Background = Instance.new("Frame");
+		Background.Name = "Background";
+		Background.Parent = ScrollSettings;
+		Background.ClipsDescendants = true;
+		Background.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
+		Background.BackgroundTransparency = 1;
+		Background.Size = UDim2.new(1, 0, 0, 20);
+		
+		local Title = Instance.new("TextLabel");
+		Title.Name = "Title";
+		Title.Parent = Background;
+		Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+		Title.BackgroundTransparency = 1;
+		Title.Position = UDim2.new(0, 60, 0.5, 0);
+		Title.Size = UDim2.new(1, -60, 0, 20);
+		Title.Font = Enum.Font.Code;
+		Title.AnchorPoint = Vector2.new(0, 0.5);
+		Title.Text = title or "";
+		Title.TextSize = 15;
+		Title.TextColor3 = Color3.fromRGB(200, 200, 200);
+		Title.TextXAlignment = Enum.TextXAlignment.Left;
+		
+		local Checkbox = Instance.new("ImageButton");
+		Checkbox.Name = "Checkbox";
+		Checkbox.Parent = Background;
+		Checkbox.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
+		Checkbox.BackgroundTransparency = 0;
+		Checkbox.AnchorPoint = Vector2.new(0, 0.5);
+		Checkbox.Position = UDim2.new(0, 30, 0.5, 0);
+		Checkbox.Size = UDim2.new(0, 20, 0, 20);
+		Checkbox.Image = "rbxassetid://10709790644";
+		Checkbox.ImageTransparency = 1;
+		Checkbox.ImageColor3 = Color3.fromRGB(245, 245, 245);
+		CreateRounded(Checkbox, 5);
+		
+		Checkbox.MouseButton1Click:Connect(function()
+			checked = not checked;
+			if checked then
+				Checkbox.ImageTransparency = 0;
+				Checkbox.BackgroundColor3 = Color3.fromRGB(255, 0, 0);
+			else
+				Checkbox.ImageTransparency = 1;
+				Checkbox.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
+			end
+			pcall(callback, checked);
+		end);
+		
+		-- Initialize checkbox state
+		if checked then
+			Checkbox.ImageTransparency = 0;
+			Checkbox.BackgroundColor3 = Color3.fromRGB(255, 0, 0);
+		else
+			Checkbox.ImageTransparency = 1;
+			Checkbox.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
+		end
+		pcall(callback, checked);
+	end
+	
+	-- Button creation function
+	function CreateButton(title, callback)
+		local Background = Instance.new("Frame");
+		Background.Name = "Background";
+		Background.Parent = ScrollSettings;
+		Background.ClipsDescendants = true;
+		Background.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
+		Background.BackgroundTransparency = 1;
+		Background.Size = UDim2.new(1, 0, 0, 30);
+		
+		local Button = Instance.new("TextButton");
+		Button.Name = "Button";
+		Button.Parent = Background;
+		Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0);
+		Button.BackgroundTransparency = 0;
+		Button.Size = UDim2.new(0.8, 0, 0, 30);
+		Button.Font = Enum.Font.Code;
+		Button.Text = title or "Button";
+		Button.AnchorPoint = Vector2.new(0.5, 0);
+		Button.Position = UDim2.new(0.5, 0, 0, 0);
+		Button.TextColor3 = Color3.fromRGB(255, 255, 255);
+		Button.TextSize = 15;
+		Button.AutoButtonColor = false;
+		
+		Button.MouseButton1Click:Connect(function()
+			pcall(callback);
+		end);
+		
+		CreateRounded(Button, 5);
+	end
+	
+	-- Create settings elements
+	CreateCheckbox("Save Settings", SettingsLib and SettingsLib.SaveSettings or false, function(state)
+		if SettingsLib then
+			SettingsLib.SaveSettings = state;
+		end
+		if getgenv and getgenv().SaveConfig then
+			getgenv().SaveConfig();
+		end
+	end);
+	
+	CreateCheckbox("Loading Animation", SettingsLib and SettingsLib.LoadAnimation or false, function(state)
+		if SettingsLib then
+			SettingsLib.LoadAnimation = state;
+		end
+		if getgenv and getgenv().SaveConfig then
+			getgenv().SaveConfig();
+		end
+	end);
+	
+	CreateButton("Reset Config", function()
+		if isfolder and isfolder("LUNAR") then
+			delfolder("LUNAR");
+		end
+		if Update and Update.Notify then
+			Update:Notify("Config has been reset!");
+		end
+	end);
 
-DragButton.ZIndex = 10;
-local mouse = game.Players.LocalPlayer:GetMouse();
-local uis = game:GetService("UserInputService");
-local CircleDragButton = Instance.new("UICorner");
-CircleDragButton.Name = "CircleDragButton";
-CircleDragButton.Parent = DragButton;
-CircleDragButton.CornerRadius = UDim.new(0, 99);
-local Top = Instance.new("Frame");
-Top.Name = "Top";
-Top.Parent = Main;
-Top.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
-Top.Size = UDim2.new(1, 0, 0, 40);
-Top.BackgroundTransparency = 1;
-CreateRounded(Top, 5);
-local NameHub = Instance.new("TextLabel");
-NameHub.Name = "NameHub";
-NameHub.Parent = Top;
-NameHub.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-NameHub.BackgroundTransparency = 1;
-NameHub.RichText = true;
-NameHub.Position = UDim2.new(0, 15, 0.5, 0);
-NameHub.AnchorPoint = Vector2.new(0, 0.5);
-NameHub.Size = UDim2.new(0, 1, 0, 25);
-NameHub.Font = Enum.Font.GothamBold;
-NameHub.Text = "LUNAR";
-NameHub.TextSize = 20;
-NameHub.TextColor3 = Color3.fromRGB(255, 255, 255);
-NameHub.TextXAlignment = Enum.TextXAlignment.Left;
-local nameHubSize = (game:GetService("TextService")):GetTextSize(NameHub.Text, NameHub.TextSize, NameHub.Font, Vector2.new(math.huge, math.huge));
-NameHub.Size = UDim2.new(0, nameHubSize.X, 0, 25);
-local SubTitle = Instance.new("TextLabel");
-SubTitle.Name = "SubTitle";
-SubTitle.Parent = NameHub;
-SubTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-SubTitle.BackgroundTransparency = 1;
-SubTitle.Position = UDim2.new(0, nameHubSize.X + 8, 0.5, 0);
-SubTitle.Size = UDim2.new(0, 1, 0, 20);
-SubTitle.Font = Enum.Font.Cartoon;
-SubTitle.AnchorPoint = Vector2.new(0, 0.5);
-SubTitle.Text = Config.SubTitle;
-SubTitle.TextSize = 15;
-SubTitle.TextColor3 = Color3.fromRGB(150, 150, 150);
-local SubTitleSize = (game:GetService("TextService")):GetTextSize(SubTitle.Text, SubTitle.TextSize, SubTitle.Font, Vector2.new(math.huge, math.huge));
-SubTitle.Size = UDim2.new(0, SubTitleSize.X, 0, 25);
-local CloseButton = Instance.new("ImageButton");
-CloseButton.Name = "CloseButton";
-CloseButton.Parent = Top;
-CloseButton.BackgroundColor3 = _G.Primary;
-CloseButton.BackgroundTransparency = 1;
-CloseButton.AnchorPoint = Vector2.new(1, 0.5);
-CloseButton.Position = UDim2.new(1, -15, 0.5, 0);
-CloseButton.Size = UDim2.new(0, 20, 0, 20);
-CloseButton.Image = "rbxassetid://7743878857";
-CloseButton.ImageTransparency = 0;
-CloseButton.ImageColor3 = Color3.fromRGB(245, 245, 245);
-CreateRounded(CloseButton, 3);
-CloseButton.MouseButton1Click:connect(function()
-(game.CoreGui:FindFirstChild("LUNAR")).Enabled = not (game.CoreGui:FindFirstChild("LUNAR")).Enabled;
-end);
-local ResizeButton = Instance.new("ImageButton");
-ResizeButton.Name = "ResizeButton";
-ResizeButton.Parent = Top;
-ResizeButton.BackgroundColor3 = _G.Primary;
-ResizeButton.BackgroundTransparency = 1;
-ResizeButton.AnchorPoint = Vector2.new(1, 0.5);
-ResizeButton.Position = UDim2.new(1, -50, 0.5, 0);
-ResizeButton.Size = UDim2.new(0, 20, 0, 20);
-ResizeButton.Image = "rbxassetid://10734886735";
-ResizeButton.ImageTransparency = 0;
-ResizeButton.ImageColor3 = Color3.fromRGB(245, 245, 245);
-CreateRounded(ResizeButton, 3);
-local BackgroundSettings = Instance.new("Frame");
-BackgroundSettings.Name = "BackgroundSettings";
-BackgroundSettings.Parent = OutlineMain;
-BackgroundSettings.ClipsDescendants = true;
-BackgroundSettings.Active = true;
-BackgroundSettings.AnchorPoint = Vector2.new(0, 0);
-BackgroundSettings.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
-BackgroundSettings.BackgroundTransparency = 0.3;
-BackgroundSettings.Position = UDim2.new(0, 0, 0, 0);
-BackgroundSettings.Size = UDim2.new(1, 0, 1, 0);
-BackgroundSettings.Visible = false;
-CreateRounded(BackgroundSettings, 15);
-local SettingsFrame = Instance.new("Frame");
-SettingsFrame.Name = "SettingsFrame";
-SettingsFrame.Parent = BackgroundSettings;
-SettingsFrame.ClipsDescendants = true;
-SettingsFrame.AnchorPoint = Vector2.new(0.5, 0.5);
-SettingsFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
-SettingsFrame.BackgroundTransparency = 0;
-SettingsFrame.Position = UDim2.new(0.5, 0, 0.5, 0);
-SettingsFrame.Size = UDim2.new(0.7, 0, 0.7, 0);
-CreateRounded(SettingsFrame, 15);
-local CloseSettings = Instance.new("ImageButton");
-CloseSettings.Name = "CloseSettings";
-CloseSettings.Parent = SettingsFrame;
-CloseSettings.BackgroundColor3 = _G.Primary;
-CloseSettings.BackgroundTransparency = 1;
-CloseSettings.AnchorPoint = Vector2.new(1, 0);
-CloseSettings.Position = UDim2.new(1, -20, 0, 15);
-CloseSettings.Size = UDim2.new(0, 20, 0, 20);
-CloseSettings.Image = "rbxassetid://10747384394";
-CloseSettings.ImageTransparency = 0;
-CloseSettings.ImageColor3 = Color3.fromRGB(245, 245, 245);
-CreateRounded(CloseSettings, 3);
-CloseSettings.MouseButton1Click:connect(function()
-BackgroundSettings.Visible = false;
-end);
-local SettingsButton = Instance.new("ImageButton");
-SettingsButton.Name = "SettingsButton";
-SettingsButton.Parent = Top;
-SettingsButton.BackgroundColor3 = _G.Primary;
-SettingsButton.BackgroundTransparency = 1;
-SettingsButton.AnchorPoint = Vector2.new(1, 0.5);
-SettingsButton.Position = UDim2.new(1, -85, 0.5, 0);
-SettingsButton.Size = UDim2.new(0, 20, 0, 20);
-SettingsButton.Image = "rbxassetid://10734950020";
-SettingsButton.ImageTransparency = 0;
-SettingsButton.ImageColor3 = Color3.fromRGB(245, 245, 245);
-CreateRounded(SettingsButton, 3);
-SettingsButton.MouseButton1Click:connect(function()
-BackgroundSettings.Visible = true;
-end);
-local TitleSettings = Instance.new("TextLabel");
-TitleSettings.Name = "TitleSettings";
-TitleSettings.Parent = SettingsFrame;
-TitleSettings.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-TitleSettings.BackgroundTransparency = 1;
-TitleSettings.Position = UDim2.new(0, 20, 0, 15);
-TitleSettings.Size = UDim2.new(1, 0, 0, 20);
-TitleSettings.Font = Enum.Font.GothamBold;
-TitleSettings.AnchorPoint = Vector2.new(0, 0);
-TitleSettings.Text = "Library Settings";
-TitleSettings.TextSize = 20;
-TitleSettings.TextColor3 = Color3.fromRGB(245, 245, 245);
-TitleSettings.TextXAlignment = Enum.TextXAlignment.Left;
-local SettingsMenuList = Instance.new("Frame");
-SettingsMenuList.Name = "SettingsMenuList";
-SettingsMenuList.Parent = SettingsFrame;
-SettingsMenuList.ClipsDescendants = true;
-SettingsMenuList.AnchorPoint = Vector2.new(0, 0);
-SettingsMenuList.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
-SettingsMenuList.BackgroundTransparency = 1;
-SettingsMenuList.Position = UDim2.new(0, 0, 0, 50);
-SettingsMenuList.Size = UDim2.new(1, 0, 1, -70);
-CreateRounded(SettingsMenuList, 15);
-local ScrollSettings = Instance.new("ScrollingFrame");
-ScrollSettings.Name = "ScrollSettings";
-ScrollSettings.Parent = SettingsMenuList;
-ScrollSettings.Active = true;
-ScrollSettings.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
-ScrollSettings.Position = UDim2.new(0, 0, 0, 0);
-ScrollSettings.BackgroundTransparency = 1;
-ScrollSettings.Size = UDim2.new(1, 0, 1, 0);
-ScrollSettings.ScrollBarThickness = 3;
-ScrollSettings.ScrollingDirection = Enum.ScrollingDirection.Y;
-CreateRounded(SettingsMenuList, 5);
-local SettingsListLayout = Instance.new("UIListLayout");
-SettingsListLayout.Name = "SettingsListLayout";
-SettingsListLayout.Parent = ScrollSettings;
-SettingsListLayout.SortOrder = Enum.SortOrder.LayoutOrder;
-SettingsListLayout.Padding = UDim.new(0, 8);
-local PaddingScroll = Instance.new("UIPadding");
-PaddingScroll.Name = "PaddingScroll";
-PaddingScroll.Parent = ScrollSettings;
-function CreateCheckbox(title, state, callback)
-local checked = state or false;
-local Background = Instance.new("Frame");
-Background.Name = "Background";
-Background.Parent = ScrollSettings;
-Background.ClipsDescendants = true;
-Background.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
-Background.BackgroundTransparency = 1;
-Background.Size = UDim2.new(1, 0, 0, 20);
-local Title = Instance.new("TextLabel");
-Title.Name = "Title";
-Title.Parent = Background;
-Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-Title.BackgroundTransparency = 1;
-Title.Position = UDim2.new(0, 60, 0.5, 0);
-Title.Size = UDim2.new(1, -60, 0, 20);
-Title.Font = Enum.Font.Code;
-Title.AnchorPoint = Vector2.new(0, 0.5);
-Title.Text = title or "";
-Title.TextSize = 15;
-Title.TextColor3 = Color3.fromRGB(200, 200, 200);
-Title.TextXAlignment = Enum.TextXAlignment.Left;
-local Checkbox = Instance.new("ImageButton");
-Checkbox.Name = "Checkbox";
-Checkbox.Parent = Background;
-Checkbox.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
-Checkbox.BackgroundTransparency = 0;
-Checkbox.AnchorPoint = Vector2.new(0, 0.5);
-Checkbox.Position = UDim2.new(0, 30, 0.5, 0);
-Checkbox.Size = UDim2.new(0, 20, 0, 20);
-Checkbox.Image = "rbxassetid://10709790644";
-Checkbox.ImageTransparency = 1;
-Checkbox.ImageColor3 = Color3.fromRGB(245, 245, 245);
-CreateRounded(Checkbox, 5);
-Checkbox.MouseButton1Click:Connect(function()
-checked = not checked;
-if checked then
-Checkbox.ImageTransparency = 0;
-Checkbox.BackgroundColor3 = Color3.fromRGB(255, 0, 0);
-else
-Checkbox.ImageTransparency = 1;
-Checkbox.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
-end;
-pcall(callback, checked);
-end);
-if checked then
-Checkbox.ImageTransparency = 0;
-Checkbox.BackgroundColor3 = Color3.fromRGB(255, 0, 0);
-else
-Checkbox.ImageTransparency = 1;
-Checkbox.BackgroundColor3 = Color3.fromRGB(100, 100, 100);
-end;
-pcall(callback, checked);
-end;
-function CreateButton(title, callback)
-local Background = Instance.new("Frame");
-Background.Name = "Background";
-Background.Parent = ScrollSettings;
-Background.ClipsDescendants = true;
-Background.BackgroundColor3 = Color3.fromRGB(24, 24, 26);
-Background.BackgroundTransparency = 1;
-Background.Size = UDim2.new(1, 0, 0, 30);
-local Button = Instance.new("TextButton");
-Button.Name = "Button";
-Button.Parent = Background;
-Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0);
-Button.BackgroundTransparency = 0;
-Button.Size = UDim2.new(0.8, 0, 0, 30);
-Button.Font = Enum.Font.Code;
-Button.Text = title or "Button";
-Button.AnchorPoint = Vector2.new(0.5, 0);
-Button.Position = UDim2.new(0.5, 0, 0, 0);
-Button.TextColor3 = Color3.fromRGB(255, 255, 255);
-Button.TextSize = 15;
-Button.AutoButtonColor = false;
-Button.MouseButton1Click:Connect(function()
-callback();
-end);
-CreateRounded(Button, 5);
-end;
-CreateCheckbox("Save Settings", SettingsLib.SaveSettings, function(state)
-SettingsLib.SaveSettings = state;
-(getgenv()).SaveConfig();
-end);
-CreateCheckbox("Loading Animation", SettingsLib.LoadAnimation, function(state)
-SettingsLib.LoadAnimation = state;
-(getgenv()).SaveConfig();
-end);
-CreateButton("Reset Config", function()
-if isfolder("LUNAR") then
-delfolder("LUNAR");
-end;
-Update:Notify("Config has been reseted!");
-end);
+
 local Tab = Instance.new("Frame");
 Tab.Name = "Tab";
 Tab.Parent = Main;
@@ -2032,5 +2120,5 @@ Grad3.Parent = Sep3;
 	end;
 	return uitab;
 end;
-end
+
 return Update;
