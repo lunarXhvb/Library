@@ -1,5 +1,3 @@
--- LUNAR HUB Library v2.0 - Recoded
--- Clean destruction of existing GUIs
 if game:GetService("CoreGui"):FindFirstChild("LUNAR") then
     game:GetService("CoreGui").LUNAR:Destroy()
 end
