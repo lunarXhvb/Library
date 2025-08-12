@@ -462,7 +462,6 @@ function Update:Window(Config)
 	DragButton.Size = UDim2.new(0, 15, 0, 15);
 	DragButton.BackgroundColor3 = _G.Primary;
 	DragButton.BackgroundTransparency = 1;
-Plain Text
 
 DragButton.ZIndex = 10;
 local mouse = game.Players.LocalPlayer:GetMouse();
@@ -2033,5 +2032,5 @@ Grad3.Parent = Sep3;
 	end;
 	return uitab;
 end;
-
+end
 return Update;
