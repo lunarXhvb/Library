@@ -1,4 +1,4 @@
-local Library = loadstring(game:HttpGet("your-script-url"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lunarXhvb/Library/refs/heads/main/Library.luau"))()
 
 -- Create Window
 local Window = Library:CreateWindow({
