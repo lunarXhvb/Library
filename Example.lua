@@ -10,7 +10,7 @@ end
 -- Create Window
 local Window = Library:Window({
     SubTitle = "v2.0",
-    Size = UDim2.new(0, 600, 0, 400),
+    Size = UDim2.new(0, 400, 0, 400),
     TabWidth = 150
 })
 
