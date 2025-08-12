@@ -61,7 +61,17 @@ OutlineButton.BackgroundTransparency = 0;
 OutlineButton.Position = UDim2.new(0, 10, 0, 10);
 OutlineButton.Size = UDim2.new(0, 50, 0, 50);
 CreateRounded(OutlineButton, 12);
-local ImageButton = Instance.new("ImageButton");
+
+-- Make the whole frame clickable
+local ClickableButton = Instance.new("TextButton");
+ClickableButton.Parent = OutlineButton;
+ClickableButton.Position = UDim2.new(0, 0, 0, 0);
+ClickableButton.Size = UDim2.new(1, 0, 1, 0);
+ClickableButton.BackgroundTransparency = 1;
+ClickableButton.Text = "";
+ClickableButton.AutoButtonColor = false;
+
+local ImageButton = Instance.new("ImageLabel"); -- Changed to ImageLabel
 ImageButton.Parent = OutlineButton;
 ImageButton.Position = UDim2.new(0.5, 0, 0.5, 0);
 ImageButton.Size = UDim2.new(0, 40, 0, 40);
@@ -71,10 +81,11 @@ ImageButton.ImageColor3 = Color3.fromRGB(250, 250, 250);
 ImageButton.ImageTransparency = 0;
 ImageButton.BackgroundTransparency = 0;
 ImageButton.Image = "rbxassetid://105059922903197";
-ImageButton.AutoButtonColor = false;
-MakeDraggable(ImageButton, OutlineButton);
+
+MakeDraggable(ClickableButton, OutlineButton); -- Make the whole button draggable
 CreateRounded(ImageButton, 10);
-ImageButton.MouseButton1Click:connect(function()
+
+ClickableButton.MouseButton1Click:connect(function()
 	(game.CoreGui:FindFirstChild("LUNAR")).Enabled = not (game.CoreGui:FindFirstChild("LUNAR")).Enabled;
 end);
 local NotificationFrame = Instance.new("ScreenGui");
